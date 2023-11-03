@@ -35,6 +35,20 @@ jobs:
       - setup_remote_docker:
           version: 20.10.14
       - run: DOCKER_BUILDKIT=1 docker build --ssh default=$HOME/.ssh/id_rsa_a332bbd8efe324066e9247acd36c54a1 --file checkout-private.Dockerfile .
+  checkout-private-during-docker-build-ssh-auth-sock:
+    docker:
+      - image: cimg/base:2023.03
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "a3:32:bb:d8:ef:e3:24:06:6e:92:47:ac:d3:6c:54:a1"
+      - setup_remote_docker:
+          version: 20.10.14
+      # 看文件 default 未指定的話是 $SSH_AUTH_SOCK
+      # 只要不指定 SSH Key，就一定會拿到 ssh-agent 中存的第一把 Key
+      # 可以在 checkout-private.Dockerfile 中執行：ssh -T git@github.com 來驗證
+      - run: DOCKER_BUILDKIT=1 docker build --progress=plain --ssh default --file checkout-private.Dockerfile .
   user-checkout-private-during-docker-build:
     docker:
       - image: cimg/base:2023.03
@@ -54,4 +68,5 @@ workflows:
       - manual-checkout-private
       - checkout-during-docker-build
       - checkout-private-during-docker-build
+      # - checkout-private-during-docker-build-ssh-auth-sock
       - user-checkout-private-during-docker-build
