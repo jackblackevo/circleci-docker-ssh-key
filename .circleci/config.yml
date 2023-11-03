@@ -1,0 +1,24 @@
+version: 2.1
+
+jobs:
+  manual-checkout:
+    docker:
+      - image: cimg/base:2023.03
+    steps:
+      - run: mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run: git clone git@github.com:jackblackevo/circleci-docker-ssh-key.git
+  manual-checkout-private:
+    docker:
+      - image: cimg/base:2023.03
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "a3:32:bb:d8:ef:e3:24:06:6e:92:47:ac:d3:6c:54:a1"
+      - run: mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run: git clone git@github.com:jackblackevo/circleci-docker-private.git
+
+workflows:
+  build:
+    jobs:
+      - manual-checkout
+      - manual-checkout-private
